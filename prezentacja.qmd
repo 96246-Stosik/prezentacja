@@ -1,0 +1,111 @@
+---
+title: "Malarze"
+author: "Szymon Stosik"
+institute: "WISiM, UPP"
+date: "2026"
+date-format: "[Programowanie w R, semestr zimowy ] 2025/2026"
+bibliography: references.bib
+execute:
+  echo: false
+format: 
+  revealjs:
+    theme: [default, style/theme.scss]
+    css: style/theme.css
+    html-math-method: mathml
+    margin-left: '3rem'
+    slide-number: true
+    navigation-mode: linear
+    embed-resources: true 
+    toc: false
+    toc-depth: 1
+    toc-title: "Plan przedmiotu"
+    show-slide-number: all
+    pdf-max-pages-per-slide: 1
+    code-block-bg: true
+    highlight-style: arrow
+progress: true
+menu: true
+smaller: true
+scrollable: false
+margin: 0.1
+revealOptions:
+  width: 1280
+  height: 720
+disable-layout: false
+transition: fade
+transition-speed: default
+engine: knitr
+---
+
+## Wstęp
+
+Subiektywna ocena, w skali od 0 do 20 (wartości całkowite), 54 malarzy klasycznych.
+
+Malarze zostali ocenieni pod względem czterech cech: kompozycji, rysunku, koloru i ekspresji.
+
+Dane pochodzą od osiemnastowiecznego krytyka sztuki, de Pilesa
+
+```{r setup, include=FALSE}
+library(MASS)
+library(kableExtra)
+library(dplyr)
+data(painters)
+painters$School = factor(painters$School, labels=c("Renesans", "Manieryzm", "Seicento", "Wenecka", "Lombardzka", "XVI Wiek", "XVII Wiek", "Francuska"))
+
+painters <- painters %>% 
+  rename(
+    Kompozycja = Composition,
+    Rysunek = Drawing,
+    Kolor = Colour,
+    Ekspresja = Expression,
+    Szkoła = School
+  )
+
+```
+
+## Wstępna analziza
+
+```{r summary}
+summary(painters)
+```
+
+## Najlepszy wynik w każdej kategorii
+
+```{r plot_school}
+
+points_school <- painters %>% 
+  group_by(Szkoła) %>% 
+  summarise(
+    Kompozycja = max(Kompozycja),
+    Rysunek = max(Rysunek),
+    Kolor = max(Kolor),
+    Ekspresja = max(Ekspresja),
+  ) 
+
+points_school %>% 
+  kbl(caption = "Najlepszy wynik w każdej kategorii") %>%
+  kable_classic(full_width = F, html_font = "Palatino")
+
+```
+
+## Najlepszy malarz każdej szkoły
+
+```{r plot_best_painter}
+best_painter <- data.frame(Malarz = rownames(painters), painters, row.names = NULL)
+
+best_painter <- best_painter %>% 
+  mutate(Suma = Kompozycja + Rysunek + Kolor + Ekspresja) %>% 
+  group_by(Szkoła) %>% 
+  filter(Suma == max(Suma)) %>% 
+  dplyr::select(Szkoła, Malarz, Suma) %>% 
+  arrange(Szkoła)
+
+best_painter%>% 
+  kbl(caption = "Najlepszy malarz każdej szkoły") %>%
+  kable_classic(full_width = F, html_font = "Palatino")
+
+```
+
+## 
+
+
